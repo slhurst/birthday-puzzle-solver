@@ -27,9 +27,10 @@ public class Board {
     private final Set<Cell> unoccupiedCells;
     private final Map<Cell, String> placedPieces = new HashMap<>();
 
-    public Board() {
+    public Board(Set<Cell> initiallyOccupiedCells) {
         unoccupiedCells = new TreeSet<>(Comparator.comparing(Cell::getY).thenComparing(Cell::getX));
         unoccupiedCells.addAll(baseCells.keySet());
+        unoccupiedCells.removeAll(initiallyOccupiedCells);
     }
 
     public boolean attemptToPlaceInCell(Piece piece, Cell candidateCell) {

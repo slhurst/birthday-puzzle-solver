@@ -17,7 +17,8 @@ public class SolverWrapper {
     public void testyMcTestFace() throws ExecutionException, InterruptedException {
         long start = System.currentTimeMillis();
 
-        Set<Set<Piece>> setsOfPieces = getSetsOfPieces();
+        PieceFactory pieceFactory = new CalendarPieceFactory(); //TODO: Make configurable for yellow-box puzzle and rename
+        Set<Set<Piece>> setsOfPieces = getSetsOfPieces(pieceFactory);
 
         Map<UnorderedPair<String>, Board> results = new ConcurrentHashMap<>(1024);
         ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -25,7 +26,7 @@ public class SolverWrapper {
 
         for (Set<Piece> setOfPieces : setsOfPieces) {
 //            executorService.execute(new Solver(setOfPieces));
-            Future<Set<Board>> future = executorService.submit((Callable<Set<Board>>) new Solver(setOfPieces));
+            Future<Set<Board>> future = executorService.submit((Callable<Set<Board>>) new Solver(setOfPieces, pieceFactory.getInitiallyOccupiedCells()));
             futures.add(future);
         }
         for (Future<Set<Board>> future : futures) {
@@ -59,8 +60,8 @@ public class SolverWrapper {
         return new UnorderedPair<>(first, second);
     }
 
-    private static Set<Set<Piece>> getSetsOfPieces() {
-        EnumMap<PieceType, Set<Piece>> allPieces = PieceFactory.getAllPieces();
+    private static Set<Set<Piece>> getSetsOfPieces(PieceFactory pieceFactory) {
+        EnumMap<PieceType, Set<Piece>> allPieces = pieceFactory.getAllPieces();
         Set<Set<Piece>> allSetsOfPieces = new HashSet<>();
         for (Piece notchPiece : allPieces.get(Notch)) {
             for (Piece notchedRectanglePiece : allPieces.get(NotchedRectangle)) {
